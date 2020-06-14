@@ -2,7 +2,7 @@
  * particle_filter.cpp
  *
  * Created on: Dec 12, 2016
- * Author: Tiffany Huang
+ * Author: Gaurav Borgaonkar Implementation of Udacity Kidnapped Vehicle project
  */
 
 #include "particle_filter.h"
@@ -21,16 +21,58 @@
 using std::string;
 using std::vector;
 
+// include normal distribution
+using std::normal_distribution;
+
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
   /**
    * TODO: Set the number of particles. Initialize all particles to 
    *   first position (based on estimates of x, y, theta and their uncertainties
-   *   from GPS) and all weights to 1. 
+   *   from GPS) and all weights to 1.
    * TODO: Add random Gaussian noise to each particle.
    * NOTE: Consult particle_filter.h for more information about this method 
    *   (and others in this file).
    */
-  num_particles = 0;  // TODO: Set the number of particles
+  num_particles = 1000;  // TODO: Set the number of particles
+  
+  std::default_random_engine gen;
+
+  // get uncertainties in x, y and theta
+  double std_x = std[0];
+  double std_y = std[1];
+  double std_theta = std[2];
+
+  // This line creates a normal (Gaussian) distribution for x
+  normal_distribution<double> dist_x(x, std_x);
+  
+  // TODO: Create normal distributions for y and theta
+  normal_distribution<double> dist_y(y, std_y);
+  normal_distribution<double> dist_theta(theta, std_theta);
+
+  // initialize all particles to first position (based on GPS)
+  for (int i = 0; i <= num_particles; i++)
+  {
+    Particle p;
+    p.id = i;
+    p.x = x;
+    p.y = y;
+    p.theta = theta;
+
+    // initialize the weights to 1.0
+    p.weight = 1.0;
+
+    // adding noise
+
+    p.x = p.x + dist_x(gen);
+    p.y = p.y + dist_y(gen);
+    p.theta = p.theta + dist_theta(gen);
+
+    // add created particle to the set of particles
+    particles.push_back(p);
+
+    // std::cout<<p.id<<", "<<p.x<<", "<<p.y<<std::endl;
+
+  }
 
 }
 
@@ -43,6 +85,11 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
+
+
+
+
+
 
 }
 
