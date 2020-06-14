@@ -21,6 +21,9 @@
 using std::string;
 using std::vector;
 
+// define random engine
+std::default_random_engine gen;
+
 // include normal distribution
 using std::normal_distribution;
 
@@ -34,8 +37,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
    *   (and others in this file).
    */
   num_particles = 1000;  // TODO: Set the number of particles
-  
-  std::default_random_engine gen;
+
 
   // get uncertainties in x, y and theta
   double std_x = std[0];
@@ -43,16 +45,19 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
   double std_theta = std[2];
 
   // This line creates a normal (Gaussian) distribution for x
-  normal_distribution<double> dist_x(x, std_x);
+  normal_distribution<double> dist_x_init(x, std_x);
   
   // TODO: Create normal distributions for y and theta
-  normal_distribution<double> dist_y(y, std_y);
-  normal_distribution<double> dist_theta(theta, std_theta);
+  normal_distribution<double> dist_y_init(y, std_y);
+  normal_distribution<double> dist_theta_init(theta, std_theta);
 
   // initialize all particles to first position (based on GPS)
   for (int i = 0; i <= num_particles; i++)
   {
+    // define a particle
     Particle p;
+
+    // assign properties
     p.id = i;
     p.x = x;
     p.y = y;
@@ -63,9 +68,9 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 
     // adding noise
 
-    p.x = p.x + dist_x(gen);
-    p.y = p.y + dist_y(gen);
-    p.theta = p.theta + dist_theta(gen);
+    p.x = p.x + dist_x_init(gen);
+    p.y = p.y + dist_y_init(gen);
+    p.theta = p.theta + dist_theta_init(gen);
 
     // add created particle to the set of particles
     particles.push_back(p);
@@ -86,10 +91,31 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
 
+  // adding noise
+  normal_distribution<double> dist_x(0, std_pos[0]);
+  
+  // TODO: Create normal distributions for y and theta
+  normal_distribution<double> dist_y(0, std_pos[1]);
+  normal_distribution<double> dist_theta(0, std_pos[2]);
 
 
+  // iterate through all the particles
+  // for (auto it = particles.begin(); particles.end(); particles++)
+  for (int i = 0; i < num_particles; i++)
+  {
+    // apply motion models here to calculate new position after time delta_t
+    particles[i].x = particles[i].x + (velocity/yaw_rate)*(sin(particles[i].theta + yaw_rate*delta_t) - sin(particles[i].theta));
 
+    particles[i].y = particles[i].y + (velocity/yaw_rate)*(cos(particles[i].theta) - cos(particles[i].theta + yaw_rate*delta_t));
 
+    particles[i].theta = particles[i].theta + (yaw_rate*delta_t);
+
+    // add random noise
+    particles[i].x = particles[i].x + dist_x(gen);
+    particles[i].y = particles[i].y + dist_y(gen);
+    particles[i].theta = particles[i].theta + dist_theta(gen);
+
+  }
 
 }
 
