@@ -38,7 +38,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
    */
   num_particles = 1000;  // TODO: Set the number of particles
 
-
+  // std is the uncertainities in GPS data
   // get uncertainties in x, y and theta
   double std_x = std[0];
   double std_y = std[1];
@@ -54,7 +54,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
   // initialize all particles to first position (based on GPS)
   for (int i = 0; i <= num_particles; i++)
   {
-    // define a particle
+    // define a particle object
     Particle p;
 
     // assign properties
@@ -91,13 +91,14 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
 
+  // std_pos is GPS measurement uncertainty
+
   // adding noise
   normal_distribution<double> dist_x(0, std_pos[0]);
   
   // TODO: Create normal distributions for y and theta
   normal_distribution<double> dist_y(0, std_pos[1]);
   normal_distribution<double> dist_theta(0, std_pos[2]);
-
 
   // iterate through all the particles
   // for (auto it = particles.begin(); particles.end(); particles++)
@@ -231,6 +232,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     // we re-initialize weights
     particles[i].weight = 1.0;
 
+    // iterate through the transformed observations and calculate weights
     for (unsigned int j = 0; j < transformed_obs.size(); j++)
     {
       double prediction_x, prediction_y;
@@ -238,11 +240,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       double mu_x = transformed_obs[j].x;
       double mu_y = transformed_obs[j].y;
 
-
       // get the x,y coordinates of the prediction associated with the current observation
       for (unsigned int k = 0; k < predictions.size(); k++)
       {
-        // if prediction is equal to transformed observations
+        // if prediction matches the transformed observations
         if (predictions[k].id == transformed_obs[j].id)
         {
           prediction_x = predictions[k].x;
@@ -250,19 +251,18 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         }
       }
 
-      // calculate weight for this observation with multivariate Gaussian
+      /* --- calculate weight for this observation with multivariate Gaussian --- */
+      // landmark measurement uncertainty (standard deviations)
       double sigma_x = std_landmark[0];
       double sigma_y = std_landmark[1];
 
       // compute multi-variate Gaussian
-
       double exponent = (pow((prediction_x-mu_x),2)/(2*pow(sigma_x, 2))) + (pow((prediction_y-mu_y),2)/(2*pow(sigma_y, 2)));
-
-      double obs_weight = (1/(2*M_PI*sigma_x*sigma_y)) * exp(-exponent);
+      double particle_weight = (1/(2*M_PI*sigma_x*sigma_y)) * exp(-exponent);
 
       // product of this obersvation weight with total observations weight
       // calculate total probability
-      particles[i].weight = particles[i].weight * obs_weight;
+      particles[i].weight = particles[i].weight * particle_weight;
 
     }   // end of transformed observations loop
 
