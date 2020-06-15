@@ -207,6 +207,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       // first check if the landmark is within the sensor range
       if(fabs(x_map - p_x) <= sensor_range && fabs(y_map - p_y))
         predictions.push_back(LandmarkObs{x_map, y_map});
+        
     } // end of j loop for map landmarks
 
     // vector to store transformed observed positions
