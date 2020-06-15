@@ -130,7 +130,41 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
    *   during the updateWeights phase.
    */
 
+  // we compare the predictions with our observations
+
+  for (unsigned int i = 0; i < observations.size(); i++)
+  {
+    // current observation
+    LandmarkObs obs = observations[i];
+
+    // init distance
+    double min_dist = std::numeric_limits<double>::max();
+
+    // init id of landmark from map placeholder to be associated with the observation
+    int map_id = -1;
+
+    for (unsigned int j = 0; j < predicted.size(); j++)
+    {
+      LandmarkObs pred = predicted[j];
+
+      // use helper function to get distance between observation and prediction
+      double cur_dist = dist(obs.x, obs.y, pred.x, pred.y);
+
+      // find nearest landmark to predicted landmark
+      if (cur_dist < min_dist)
+      {
+        min_dist = cur_dist;
+        map_id = pred.id;
+      }
+
+    }
+    // set the observation's id to the nearest predicted landmark's id
+    observations[i].id = map_id;
+
+  }
+
 }
+
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
                                    const vector<LandmarkObs> &observations, 
@@ -148,6 +182,12 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   and the following is a good resource for the actual equation to implement
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
+
+  // for every particle
+
+
+
+
 
 }
 
